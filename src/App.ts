@@ -1,9 +1,12 @@
 import express from "express";
+import cors from "cors";
+
 import path from "path";
 
+import { api } from "@/api/api";
 import { render } from "@/utils/EsBuildUtils";
 
-const publicDir = path.join(process.cwd(), "public");
+const publicPath = path.join(process.cwd(), "public");
 
 const { NODE_ENV, ADDRESS, PORT } = process.env;
 if (NODE_ENV !== "production") {
@@ -24,7 +27,13 @@ if (!PORT) {
 
 const app = express();
 
-app.use(express.static(publicDir));
+app.use(express.static(publicPath));
+app.use(cors());
+
+/**
+ * Waiting for any request for path that start with `/api` for return backend
+ */
+app.use("/api", api);
 
 /**
  * Waiting for any request for path that did not start with `/api` for return frontend.
@@ -33,7 +42,7 @@ app.get("*", (req, res) => {
   /**
    * Just send a html file.
    */
-  res.sendFile(path.join(publicDir, "index.html"));
+  return res.sendFile(path.join(publicPath, "index.html"));
 });
 
 app.listen(PORT, ADDRESS, () => {
